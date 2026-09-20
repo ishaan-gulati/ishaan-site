@@ -328,6 +328,7 @@
     transform: translateX(-50%);
     z-index: 0;
     pointer-events: none;
+    contain: layout style paint;
     will-change: transform;
     animation: orb-breathe 12s ease-in-out infinite;
   }
@@ -347,12 +348,17 @@
       inset 0 -22px 54px -12px rgba(201, 168, 118, 0.4),
       0 0 60px 4px rgba(201, 168, 118, 0.2);
     opacity: 0.95;
-    will-change: transform;
-    animation: orb-spin 60s linear infinite;
+    will-change: transform, border-radius;
+    animation: orb-spin 60s linear infinite, orb-morph 20s ease-in-out infinite;
   }
   @keyframes orb-spin {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
+  }
+  @keyframes orb-morph {
+    0%, 100% { border-radius: 46% 54% 42% 58% / 58% 62% 38% 42%; }
+    33% { border-radius: 58% 42% 40% 60% / 45% 55% 45% 55%; }
+    66% { border-radius: 50% 50% 55% 45% / 60% 40% 60% 40%; }
   }
   @keyframes orb-breathe {
     0%, 100% { transform: translateX(-50%) scale(1); }
