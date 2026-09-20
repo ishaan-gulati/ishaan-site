@@ -12,13 +12,3 @@ Includes `robots.txt`, `sitemap.xml`, and `llms.txt` for search and LLM-retrieva
 
 ## Run locally
 Just open `index.html` in a browser.
-
-## TODO before shipping
-Search `index.html` for `PASTE_` to find placeholder links that still need real URLs:
-- LinkedIn
-- Pulse App Store link
-- Fern.ai Devpost/GitHub link
-- Felix Devpost/GitHub link
-- Instagram (@investingwithishaan)
-
-Once those are set, add the matching `sameAs` array to the JSON-LD block in `<head>`.
