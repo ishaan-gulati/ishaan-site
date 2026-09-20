@@ -319,13 +319,40 @@
     padding: 6rem 1.5rem 4rem;
     overflow: hidden;
   }
-  #wireframe {
+  .hero-orb {
+    position: absolute;
+    left: 50%;
+    bottom: -20vw;
+    width: min(64vw, 680px);
+    height: min(64vw, 680px);
+    transform: translateX(-50%);
+    z-index: 0;
+    filter: blur(2px);
+  }
+  .hero-orb-inner {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    opacity: 0.55;
+    display: block;
+    border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%;
+    background:
+      radial-gradient(circle at 30% 26%, rgba(255, 244, 214, 0.85), transparent 30%),
+      radial-gradient(circle at 70% 76%, rgba(201, 168, 118, 0.5), transparent 55%),
+      radial-gradient(circle at 50% 50%, rgba(66, 55, 34, 0.92), rgba(10, 9, 8, 0.96) 72%);
+    box-shadow: 0 0 140px 24px rgba(201, 168, 118, 0.22), inset 0 0 90px rgba(0, 0, 0, 0.5);
+    opacity: 0.85;
+    animation: orb-spin 46s linear infinite, orb-morph 16s ease-in-out infinite;
+  }
+  @keyframes orb-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  @keyframes orb-morph {
+    0%, 100% { border-radius: 42% 58% 63% 37% / 41% 44% 56% 59%; }
+    33% { border-radius: 58% 42% 39% 61% / 55% 60% 40% 45%; }
+    66% { border-radius: 48% 52% 55% 45% / 50% 38% 62% 50%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hero-orb-inner { animation: none; }
   }
   .hero-content { position: relative; z-index: 1; }
 
@@ -666,7 +693,7 @@
 
 <section class="hero" id="top">
   <span class="boot-flash" aria-hidden="true"></span>
-  <canvas id="wireframe" aria-hidden="true"></canvas>
+  <div class="hero-orb" aria-hidden="true"><span class="hero-orb-inner"></span></div>
   <div class="hero-content">
     <h1 class="hero-name">Hi, I'm Ishaan</h1>
     <p class="hero-tagline">Visionary &middot; Builder &middot; Future-focused</p>
@@ -987,119 +1014,6 @@
     });
   }
 
-  /* Hero wireframe globe — canvas, monochrome, mouse-reactive */
-  (function () {
-    var canvas = document.getElementById('wireframe');
-    if (!canvas) return;
-    var ctx = canvas.getContext('2d');
-    var hero = canvas.parentElement;
-    var dpr = Math.min(window.devicePixelRatio || 1, 2);
-    var w, h, cx, cy, radius;
-
-    function resize() {
-      w = hero.clientWidth;
-      h = hero.clientHeight;
-      canvas.width = w * dpr;
-      canvas.height = h * dpr;
-      canvas.style.width = w + 'px';
-      canvas.style.height = h + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      cx = w / 2;
-      cy = h / 2;
-      radius = Math.min(w, h) * 0.34;
-    }
-    resize();
-    window.addEventListener('resize', resize);
-
-    var LAT_RINGS = 6;
-    var MER_COUNT = 8;
-    var SEGMENTS = 40;
-
-    function buildLines() {
-      var lines = [];
-      for (var i = 1; i < LAT_RINGS; i++) {
-        var theta = -Math.PI / 2 + (i / LAT_RINGS) * Math.PI;
-        var pts = [];
-        for (var j = 0; j <= SEGMENTS; j++) {
-          var phi = (j / SEGMENTS) * Math.PI * 2;
-          pts.push({
-            x: Math.cos(theta) * Math.cos(phi),
-            y: Math.sin(theta),
-            z: Math.cos(theta) * Math.sin(phi)
-          });
-        }
-        lines.push({ pts: pts, highlight: i === Math.floor(LAT_RINGS / 2) });
-      }
-      for (var m = 0; m < MER_COUNT; m++) {
-        var phi2 = (m / MER_COUNT) * Math.PI * 2;
-        var pts2 = [];
-        for (var k = 0; k <= SEGMENTS; k++) {
-          var theta2 = -Math.PI / 2 + (k / SEGMENTS) * Math.PI;
-          pts2.push({
-            x: Math.cos(theta2) * Math.cos(phi2),
-            y: Math.sin(theta2),
-            z: Math.cos(theta2) * Math.sin(phi2)
-          });
-        }
-        lines.push({ pts: pts2, highlight: false });
-      }
-      return lines;
-    }
-    var lines = buildLines();
-
-    var rotY = 0;
-    var rotX = 0.3;
-    var targetTiltX = 0;
-    var targetTiltY = 0;
-
-    hero.addEventListener('mousemove', function (e) {
-      var r = hero.getBoundingClientRect();
-      targetTiltY = ((e.clientX - r.left) / r.width - 0.5) * 0.6;
-      targetTiltX = ((e.clientY - r.top) / r.height - 0.5) * 0.4;
-    });
-
-    function project(p, rY, rX) {
-      var x1 = p.x * Math.cos(rY) - p.z * Math.sin(rY);
-      var z1 = p.x * Math.sin(rY) + p.z * Math.cos(rY);
-      var y1 = p.y * Math.cos(rX) - z1 * Math.sin(rX);
-      var z2 = p.y * Math.sin(rX) + z1 * Math.cos(rX);
-      var perspective = 2.6;
-      var scale = perspective / (perspective + z2);
-      return { x: x1 * scale, y: y1 * scale, z: z2 };
-    }
-
-    function draw(rY, rX) {
-      ctx.clearRect(0, 0, w, h);
-      lines.forEach(function (line) {
-        for (var i = 0; i < line.pts.length - 1; i++) {
-          var a = project(line.pts[i], rY, rX);
-          var b = project(line.pts[i + 1], rY, rX);
-          var depth = (a.z + b.z) / 2;
-          var alpha = 0.12 + Math.max(0, (depth + 1) / 2) * 0.28;
-          ctx.strokeStyle = line.highlight
-            ? 'rgba(201,168,118,' + (alpha * 1.1).toFixed(3) + ')'
-            : 'rgba(236,233,227,' + alpha.toFixed(3) + ')';
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.moveTo(cx + a.x * radius, cy + a.y * radius);
-          ctx.lineTo(cx + b.x * radius, cy + b.y * radius);
-          ctx.stroke();
-        }
-      });
-    }
-
-    if (reduceMotion) {
-      draw(rotY, rotX + 0.3);
-    } else {
-      function tick() {
-        rotY += 0.0016 + targetTiltY * 0.001;
-        rotX += (targetTiltX - (rotX - 0.3)) * 0.04;
-        draw(rotY, rotX + 0.3);
-        requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }
-  })();
 </script>
 
 <script defer src="/_vercel/insights/script.js"></script>
