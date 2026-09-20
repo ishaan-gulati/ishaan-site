@@ -315,15 +315,25 @@
     transform: translateY(14px);
     animation: hero-in 0.8s var(--ease) forwards;
   }
-  .hero-name { animation-delay: 0.1s; }
-  .hero-tagline { animation-delay: 0.22s; }
-  .hero-cta { animation-delay: 0.34s; }
-  .scroll-cue { animation-delay: 0.48s; }
+  .hero-eyebrow { animation-delay: 0.1s; }
+  .hero-name { animation-delay: 0.22s; }
+  .hero-tagline { animation-delay: 0.34s; }
+  .hero-cta { animation-delay: 0.46s; }
+  .scroll-cue { animation-delay: 0.6s; }
   @keyframes hero-in { to { opacity: 1; transform: translateY(0); } }
   @media (prefers-reduced-motion: reduce) {
     .hero-content > * { animation: none; opacity: 1; transform: none; }
   }
 
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--text-2);
+    margin-bottom: 1.75rem;
+  }
   .hero-name {
     font-size: clamp(2.75rem, 9vw, 5.75rem);
     font-weight: 800;
@@ -441,10 +451,10 @@
   .skills-flow .skill-pill:nth-child(5) { transition-delay: 140ms; }
   .skills-flow .skill-pill:nth-child(6) { transition-delay: 175ms; }
   .skills-flow .skill-pill:nth-child(7) { transition-delay: 210ms; }
-  .cert-flow .cert-row:nth-child(1) { transition-delay: 0ms; }
-  .cert-flow .cert-row:nth-child(2) { transition-delay: 50ms; }
-  .cert-flow .cert-row:nth-child(3) { transition-delay: 100ms; }
-  .cert-flow .cert-row:nth-child(4) { transition-delay: 150ms; }
+  .cert-flow .cert-card:nth-child(1) { transition-delay: 0ms; }
+  .cert-flow .cert-card:nth-child(2) { transition-delay: 50ms; }
+  .cert-flow .cert-card:nth-child(3) { transition-delay: 100ms; }
+  .cert-flow .cert-card:nth-child(4) { transition-delay: 150ms; }
 
   /* ---------- Panels — open, borderless entries with a soft cursor-lit backdrop ---------- */
   .panel-list { display: flex; flex-direction: column; }
@@ -520,39 +530,75 @@
   }
   .tag.muted { color: var(--text-2); }
 
-  /* ---------- Skills — a flowing cloud of pills, not a grid ---------- */
+  /* ---------- Skills — a flowing, symmetric cloud of pills ---------- */
   .stack-label { font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-2); margin: 3rem 0 1.25rem; }
   .skills-flow {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.65rem 0.7rem;
+    justify-content: center;
+    gap: 0.7rem 0.75rem;
   }
   .skill-pill {
-    padding: 0.6rem 1.15rem;
+    position: relative;
+    padding: 0.65rem 1.2rem 0.65rem 1.65rem;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.045);
+    background: linear-gradient(135deg, rgba(201, 168, 118, 0.09), rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--border);
     color: var(--text-1);
     font-size: 0.88rem;
-    transition: opacity 0.5s var(--ease), transform 0.4s var(--ease), background 0.3s var(--ease-snap), color 0.3s var(--ease-snap);
+    font-weight: 500;
+    animation: pill-glow 5s var(--ease) infinite;
+    transition: opacity 0.5s var(--ease), transform 0.4s var(--ease), background 0.3s var(--ease-snap), color 0.3s var(--ease-snap), border-color 0.3s var(--ease-snap), box-shadow 0.3s var(--ease-snap);
   }
-  .skill-pill:hover { background: rgba(201, 168, 118, 0.14); color: var(--text-0); transform: translateY(-2px); }
+  .skill-pill::before {
+    content: "";
+    position: absolute;
+    left: 0.85rem;
+    top: 50%;
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+    transform: translateY(-50%);
+  }
+  .skill-pill:hover {
+    background: linear-gradient(135deg, rgba(201, 168, 118, 0.24), rgba(201, 168, 118, 0.08));
+    border-color: rgba(201, 168, 118, 0.5);
+    color: var(--text-0);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 22px -10px rgba(201, 168, 118, 0.45);
+  }
+  @keyframes pill-glow {
+    0%, 100% { box-shadow: 0 0 0 rgba(201, 168, 118, 0); }
+    50% { box-shadow: 0 0 16px rgba(201, 168, 118, 0.16); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skill-pill { animation: none; }
+  }
 
-  /* ---------- Certifications — an open, unboxed list ---------- */
-  .cert-flow { display: flex; flex-direction: column; }
-  .cert-row {
+  /* ---------- Certifications — a symmetric card grid ---------- */
+  .cert-flow { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+  .cert-card {
     display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 0.3rem 1rem;
-    padding-block: 1.1rem;
-    border-bottom: 1px solid var(--border-soft);
-    transition: opacity 0.5s var(--ease), transform 0.4s var(--ease);
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.15rem 1.3rem;
+    border-radius: 18px;
+    border: 1px solid var(--border-soft);
+    background: rgba(255, 255, 255, 0.02);
+    transition: opacity 0.5s var(--ease), transform 0.4s var(--ease), border-color 0.3s var(--ease), background 0.3s var(--ease);
   }
-  .cert-row:last-child { border-bottom: none; padding-bottom: 0; }
-  .cert-row:first-child { padding-top: 0; }
+  .cert-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(201, 168, 118, 0.4);
+    background: rgba(201, 168, 118, 0.05);
+  }
+  .cert-org { color: var(--accent); font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; }
   .cert-name { color: var(--text-0); font-weight: 600; font-size: 0.98rem; }
-  .cert-org { color: var(--text-2); font-family: var(--font-mono); font-size: 0.82rem; }
+  @media (max-width: 560px) {
+    .cert-flow { grid-template-columns: 1fr; }
+  }
 
   /* ---------- Contact — closing chapter ---------- */
   .contact-chapter { min-height: 70svh; min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-block: 5rem; }
@@ -613,6 +659,7 @@
   <span class="boot-flash" aria-hidden="true"></span>
   <canvas id="wireframe" aria-hidden="true"></canvas>
   <div class="hero-content">
+    <p class="hero-eyebrow">Visionary &middot; Builder &middot; Future-focused</p>
     <h1 class="hero-name">Hi, I'm Ishaan</h1>
     <p class="hero-tagline">I build fintech and AI products, end to end, from idea to App Store.</p>
     <div class="hero-cta">
@@ -729,10 +776,10 @@
 
     <p class="stack-label">Certifications</p>
     <div class="cert-flow">
-      <div class="cert-row" data-animate><span class="cert-name">Financial Markets</span><span class="cert-org">Yale</span></div>
-      <div class="cert-row" data-animate><span class="cert-name">Corporate Finance</span><span class="cert-org">UPenn</span></div>
-      <div class="cert-row" data-animate><span class="cert-name">Fundamentals of Finance</span><span class="cert-org">UPenn</span></div>
-      <div class="cert-row" data-animate><span class="cert-name">Advanced Python</span><span class="cert-org">Youngwonks</span></div>
+      <div class="cert-card" data-animate><span class="cert-org">Yale</span><span class="cert-name">Financial Markets</span></div>
+      <div class="cert-card" data-animate><span class="cert-org">UPenn</span><span class="cert-name">Corporate Finance</span></div>
+      <div class="cert-card" data-animate><span class="cert-org">UPenn</span><span class="cert-name">Fundamentals of Finance</span></div>
+      <div class="cert-card" data-animate><span class="cert-org">Youngwonks</span><span class="cert-name">Advanced Python</span></div>
     </div>
   </section>
 
