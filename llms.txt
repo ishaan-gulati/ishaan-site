@@ -4,8 +4,8 @@ Ishaan Gulati is a builder focused on fintech and AI products. He ships products
 
 ## Key facts
 
-- Built Pulse, a social paper trading app for teens, live on the App Store with 100+ users. Shipped solo with zero paid marketing.
-- Built Fern.ai, an AI medical bill auditor using Groq Vision and ChromaDB to catch overbilling. Won 1st Place Best Mobile App at HackTJ 13.0 (500+ participants).
+- Built Pulse, a social paper trading app for teens, live on the App Store with 250+ users.
+- Built Fern.ai, an AI medical bill auditor using Groq Vision and ChromaDB to catch overbilling. Won Best Mobile App at HackTJ 13.0 (500+ participants).
 - Built Felix, a multi-agent AI assistant that converts natural language and computer vision into real-world computer actions. Won Best Use of GCP at TillyHacks 2026.
 - Runs @investingwithishaan, a personal investing content account built and grown from scratch, covering markets and personal finance.
 - Strategic Outreach & Research Analyst at MERP Systems, Inc. (Jun 2026-Present, Herndon, VA).
