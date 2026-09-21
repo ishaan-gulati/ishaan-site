@@ -88,7 +88,7 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; font-size: 119%; }
   body {
     background: var(--bg);
     color: var(--text-0);
@@ -179,6 +179,21 @@
     transition: color 0.25s var(--ease-snap);
   }
   .liquid-nav a.scramble:hover, .liquid-nav a.scramble:focus-visible { color: var(--text-0); }
+  @media (max-width: 640px) {
+    .liquid-nav { padding: 1rem 1.1rem; }
+    .liquid-nav .brand { font-size: 0.6rem; }
+    .liquid-nav ul {
+      gap: 0;
+      max-width: 70vw;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent 100%);
+      mask-image: linear-gradient(90deg, #000 88%, transparent 100%);
+    }
+    .liquid-nav ul::-webkit-scrollbar { display: none; }
+    .liquid-nav a.scramble { font-size: 0.56rem; letter-spacing: 0.06em; padding: 0.5rem 0.4rem; white-space: nowrap; }
+  }
   .nav-ring {
     position: absolute;
     inset: 0;
@@ -456,7 +471,7 @@
 
   <section id="about" class="fx-inertia">
     <h2 class="section-label breathe-p">01 &mdash; About</h2>
-    <p class="flow-lead breathe-p">I'm Ishaan. I'm 15, and I see where things are headed before most people do &mdash; so instead of waiting around, I build toward it. I care more about making something real than talking about making something real. I'm not interested in doing things the way they've always been done. I'm interested in what's next, and getting there first.</p>
+    <p class="flow-lead breathe-p">I'm Ishaan. I'm 15, and I see where things are headed before most people do. So instead of waiting around, I build toward it. I care more about making something real than talking about making something real. I'm not interested in doing things the way they've always been done. I'm interested in what's next, and getting there first.</p>
   </section>
 
   <section id="projects" class="fx-inertia">
