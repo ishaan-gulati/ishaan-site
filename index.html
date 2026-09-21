@@ -2,7 +2,676 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Living Liquid — Interface Prototype</title>
+<meta name="robots" content="noindex, nofollow" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #050506;
+    --bg-2: #0c0c0e;
+    --text-0: #f5f5f6;
+    --text-1: #9a9a9e;
+    --text-2: #58585c;
+    --line: rgba(255, 255, 255, 0.12);
+    --line-soft: rgba(255, 255, 255, 0.06);
+    --glow: rgba(255, 255, 255, 0.85);
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-snap: cubic-bezier(0.65, 0, 0.35, 1);
+    --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text-0);
+    font-family: var(--font-sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  img { max-width: 100%; }
+  a { color: inherit; text-decoration: none; }
+  ::selection { background: rgba(255, 255, 255, 0.2); }
+
+  /* ---------- Dust canvas: reactive microscopic particles ---------- */
+  #dust-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.8;
+  }
+
+  /* ---------- Smokey liquid tendrils ---------- */
+  .tendrils { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .tendril {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: 0.5;
+  }
+  .tendril.t1 {
+    width: 60vw; height: 22vw;
+    top: -6vw; left: -14vw;
+    background: radial-gradient(ellipse, rgba(255, 255, 255, 0.07), transparent 70%);
+    animation: tendril-drift-1 42s ease-in-out infinite alternate;
+  }
+  .tendril.t2 {
+    width: 50vw; height: 20vw;
+    bottom: -4vw; right: -12vw;
+    background: radial-gradient(ellipse, rgba(180, 182, 186, 0.09), transparent 70%);
+    animation: tendril-drift-2 50s ease-in-out infinite alternate;
+    transform: rotate(-18deg);
+  }
+  .tendril.t3 {
+    width: 40vw; height: 16vw;
+    top: 40%; left: 30%;
+    background: radial-gradient(ellipse, rgba(255, 255, 255, 0.05), transparent 70%);
+    animation: tendril-drift-3 60s ease-in-out infinite alternate;
+    transform: rotate(12deg);
+  }
+  @keyframes tendril-drift-1 { from { transform: translate(0,0) rotate(0deg); } to { transform: translate(6vw, 5vw) rotate(6deg); } }
+  @keyframes tendril-drift-2 { from { transform: translate(0,0) rotate(-18deg); } to { transform: translate(-5vw, -6vw) rotate(-24deg); } }
+  @keyframes tendril-drift-3 { from { transform: translate(0,0) rotate(12deg); } to { transform: translate(-4vw, 4vw) rotate(18deg); } }
+  @media (prefers-reduced-motion: reduce) {
+    .tendril { animation: none; }
+  }
+
+  /* ---------- Nav ---------- */
+  .liquid-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.4rem 2rem;
+    background: linear-gradient(180deg, rgba(5,5,6,0.85), transparent);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .liquid-nav .brand {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    font-weight: 700;
+    color: var(--text-0);
+  }
+  .liquid-nav ul { list-style: none; display: flex; gap: 0.5rem; }
+  .liquid-nav a.scramble {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--text-1);
+    padding: 0.55rem 0.95rem;
+    border-radius: 3px;
+    transition: color 0.25s var(--ease-snap);
+  }
+  .liquid-nav a.scramble:hover, .liquid-nav a.scramble:focus-visible { color: var(--text-0); }
+  .nav-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    opacity: 0;
+    transform: scale(0.85);
+    pointer-events: none;
+    z-index: -1;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .scramble:hover .nav-ring, .scramble:focus-visible .nav-ring {
+      animation: nav-ring-pulse 0.6s var(--ease-snap) forwards;
+    }
+  }
+  @keyframes nav-ring-pulse {
+    0% { opacity: 0.85; transform: scale(0.85); }
+    100% { opacity: 0; transform: scale(1.8); }
+  }
+
+  /* ---------- Digital dust burst overlay (section-transition) ---------- */
+  #burst-canvas {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    pointer-events: none;
+  }
+
+  main { position: relative; z-index: 2; }
+
+  /* ---------- Stage: central liquid orb ---------- */
+  .stage {
+    position: relative;
+    min-height: 100svh;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 6rem 1.5rem;
+    overflow: hidden;
+  }
+  .orb {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: min(58vw, 620px);
+    height: min(58vw, 620px);
+    z-index: 0;
+    pointer-events: none;
+  }
+  .orb-cells { position: absolute; inset: 0; filter: url(#orb-goo); }
+  .orb-cell { position: absolute; border-radius: 50%; will-change: transform; }
+  .orb-cell.c1 {
+    width: 60%; height: 58%; left: 22%; top: 23%;
+    background: radial-gradient(circle at 40% 35%, rgba(230,231,234,0.94), rgba(16,16,18,0.92) 68%, transparent 100%);
+    animation: orb-drift-1 13s ease-in-out infinite, orb-breathe 5.5s ease-in-out infinite;
+  }
+  .orb-cell.c2 {
+    width: 40%; height: 40%; left: 16%; top: 42%;
+    background: radial-gradient(circle at 50% 50%, rgba(160,163,167,0.85), transparent 76%);
+    animation: orb-drift-2 16s ease-in-out infinite, orb-breathe 6.5s ease-in-out infinite 0.3s;
+  }
+  .orb-cell.c3 {
+    width: 36%; height: 36%; left: 46%; top: 16%;
+    background: radial-gradient(circle at 50% 50%, rgba(185,188,191,0.8), transparent 76%);
+    animation: orb-drift-3 14.5s ease-in-out infinite, orb-breathe 6s ease-in-out infinite 0.6s;
+  }
+  .orb-cell.c4 {
+    width: 22%; height: 14%; left: 34%; top: 24%;
+    background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.96), transparent 78%);
+    mix-blend-mode: screen;
+    animation: orb-drift-4 9s ease-in-out infinite;
+  }
+  .orb-cell.c5 {
+    width: 15%; height: 38%; left: 24%; top: 50%;
+    background: radial-gradient(ellipse at 50% 30%, rgba(110,113,117,0.7), transparent 82%);
+    animation: orb-drift-5 18s ease-in-out infinite;
+  }
+  .orb-cell.c6 {
+    width: 18%; height: 18%; left: 60%; top: 54%;
+    background: radial-gradient(circle at 50% 50%, rgba(200,203,206,0.75), transparent 78%);
+    animation: orb-drift-6 15s ease-in-out infinite;
+  }
+  @keyframes orb-drift-1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(2%,-3%) scale(1.06); } }
+  @keyframes orb-drift-2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-6%,5%) scale(0.9); } }
+  @keyframes orb-drift-3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(6%,4%) scale(1.12); } }
+  @keyframes orb-drift-4 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-5%,3%); } }
+  @keyframes orb-drift-5 { 0%,100% { transform: translate(0,0) scaleY(1); } 50% { transform: translate(5%,-6%) scaleY(1.2); } }
+  @keyframes orb-drift-6 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-4%,-5%) scale(1.15); } }
+  @keyframes orb-breathe { 0%,100% { opacity: 0.86; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .orb-cell { animation: none; } }
+
+  .stage-copy { position: relative; z-index: 1; }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    margin-bottom: 1.5rem;
+  }
+  .stage h1 {
+    font-size: clamp(3rem, 9vw, 6.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+    animation: fx-breathe 6s ease-in-out infinite;
+  }
+  .lead {
+    margin-top: 1.5rem;
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--text-1);
+    max-width: 34ch;
+    margin-inline: auto;
+  }
+  @keyframes fx-breathe {
+    0%, 100% { text-shadow: 0 0 0 rgba(255,255,255,0); }
+    50% { text-shadow: 0 0 26px rgba(255,255,255,0.25); }
+  }
+  @media (prefers-reduced-motion: reduce) { .stage h1 { animation: none; } }
+
+  .scroll-cue {
+    position: absolute;
+    bottom: 2.5rem; left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    color: var(--text-2);
+    display: flex; flex-direction: column; align-items: center; gap: 0.6rem;
+  }
+  .scroll-cue .rail { width: 1px; height: 2.5rem; background: var(--line); position: relative; overflow: hidden; }
+  .scroll-cue .rail::after {
+    content: ""; position: absolute; left: 0; top: -40%; width: 100%; height: 40%;
+    background: var(--text-0);
+    animation: rail-drip 2s linear infinite;
+  }
+  @keyframes rail-drip { 0% { top: -40%; } 100% { top: 100%; } }
+
+  /* ---------- Section shell ---------- */
+  section { position: relative; padding: 8rem 1.5rem; max-width: 900px; margin: 0 auto; }
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text-2);
+    margin-bottom: 1.5rem;
+  }
+
+  /* ---------- Typography demo ---------- */
+  .type-demo h2 {
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    animation: fx-breathe-soft 5.5s ease-in-out infinite;
+  }
+  .type-demo .lead-2 {
+    margin-top: 1.25rem;
+    color: var(--text-1);
+    max-width: 56ch;
+    font-size: 1.05rem;
+    animation: fx-breathe-soft 6.5s ease-in-out infinite 0.4s;
+  }
+  @keyframes fx-breathe-soft {
+    0%, 100% { opacity: 0.88; }
+    50% { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) { .type-demo h2, .type-demo .lead-2 { animation: none; } }
+
+  /* ---------- Modules grid ---------- */
+  .module-grid {
+    margin-top: 2.5rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  .module {
+    padding: 1.8rem 1.5rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 4px;
+    background: rgba(255,255,255,0.015);
+    animation: fx-breathe-border 7s ease-in-out infinite;
+  }
+  .module:nth-child(2) { animation-delay: 0.5s; }
+  .module:nth-child(3) { animation-delay: 1s; }
+  @keyframes fx-breathe-border {
+    0%, 100% { border-color: var(--line-soft); }
+    50% { border-color: rgba(255,255,255,0.2); }
+  }
+  .module .tag { font-family: var(--font-mono); font-size: 0.68rem; color: var(--text-2); letter-spacing: 0.1em; }
+  .module h3 { margin-top: 0.6rem; font-size: 1.15rem; font-weight: 700; }
+  .module p { margin-top: 0.6rem; color: var(--text-1); font-size: 0.9rem; }
+  @media (max-width: 720px) { .module-grid { grid-template-columns: 1fr; } }
+
+  /* ---------- Frame (image) reveal demo ---------- */
+  .frame-grid { margin-top: 2.5rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .frame {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: 4px;
+    overflow: hidden;
+    background: linear-gradient(155deg, #1b1b1e, #0a0a0b 60%, #232326);
+    border: 1px solid var(--line-soft);
+    clip-path: inset(50% 0 50% 0);
+    box-shadow: 0 0 0 rgba(255,255,255,0);
+    transition: clip-path 0.9s var(--ease), box-shadow 0.9s var(--ease);
+  }
+  .frame::before {
+    content: "";
+    position: absolute; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.9'/%3E%3C/svg%3E");
+    opacity: 0.6;
+    mix-blend-mode: overlay;
+    transition: opacity 0.9s var(--ease);
+  }
+  .frame .frame-label {
+    position: absolute; left: 1rem; bottom: 1rem;
+    font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.1em; color: var(--text-1);
+    opacity: 0; transition: opacity 0.6s ease 0.4s;
+  }
+  .frame.revealed {
+    clip-path: inset(0 0 0 0);
+    box-shadow: 0 0 34px rgba(255,255,255,0.16);
+  }
+  .frame.revealed::before { opacity: 0; }
+  .frame.revealed .frame-label { opacity: 1; }
+  @media (max-width: 720px) { .frame-grid { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) {
+    .frame { clip-path: inset(0 0 0 0); }
+    .frame::before { opacity: 0; }
+  }
+
+  /* ---------- Scroll inertia ---------- */
+  .fx-inertia { will-change: transform; }
+
+  footer {
+    padding: 3rem 1.5rem 4rem;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    color: var(--text-2);
+    position: relative; z-index: 2;
+  }
+</style>
 </head>
 <body>
+
+<canvas id="dust-canvas" aria-hidden="true"></canvas>
+<canvas id="burst-canvas" aria-hidden="true"></canvas>
+
+<div class="tendrils" aria-hidden="true">
+  <span class="tendril t1"></span>
+  <span class="tendril t2"></span>
+  <span class="tendril t3"></span>
+</div>
+
+<nav class="liquid-nav">
+  <a class="brand" href="#stage">LIVING LIQUID</a>
+  <ul>
+    <li><a href="#stage" data-target="stage" class="scramble" data-text="CORE">CORE<span class="nav-ring" aria-hidden="true"></span></a></li>
+    <li><a href="#type" data-target="type" class="scramble" data-text="TYPE">TYPE<span class="nav-ring" aria-hidden="true"></span></a></li>
+    <li><a href="#modules" data-target="modules" class="scramble" data-text="MODULES">MODULES<span class="nav-ring" aria-hidden="true"></span></a></li>
+    <li><a href="#frames" data-target="frames" class="scramble" data-text="FRAMES">FRAMES<span class="nav-ring" aria-hidden="true"></span></a></li>
+  </ul>
+</nav>
+
+<svg width="0" height="0" style="position: absolute;" aria-hidden="true">
+  <defs>
+    <filter id="orb-goo" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
+      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -11" result="goo" />
+      <feBlend in="SourceGraphic" in2="goo" />
+    </filter>
+  </defs>
+</svg>
+
+<main id="main">
+
+  <section id="stage" class="stage">
+    <div class="orb" aria-hidden="true">
+      <div class="orb-cells">
+        <span class="orb-cell c1"></span>
+        <span class="orb-cell c2"></span>
+        <span class="orb-cell c3"></span>
+        <span class="orb-cell c4"></span>
+        <span class="orb-cell c5"></span>
+        <span class="orb-cell c6"></span>
+      </div>
+    </div>
+    <div class="stage-copy">
+      <p class="eyebrow">Interface Prototype</p>
+      <h1>Living<br />Liquid</h1>
+      <p class="lead">A conscious, monochrome interface. Mercury given form, and set in constant motion.</p>
+    </div>
+    <div class="scroll-cue" aria-hidden="true"><span class="rail"></span>SCROLL</div>
+  </section>
+
+  <section id="type" class="type-demo fx-inertia">
+    <p class="section-label">01 &mdash; Type</p>
+    <h2>Every element breathes.</h2>
+    <p class="lead-2">Text and borders pulse gently brighter and dimmer over time &mdash; a slow rhythm underneath the surface, like something alive rather than rendered.</p>
+  </section>
+
+  <section id="modules" class="fx-inertia">
+    <p class="section-label">02 &mdash; Modules</p>
+    <h2 style="font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 700; letter-spacing: -0.01em;">Hover the nav to see it react.</h2>
+    <div class="module-grid">
+      <div class="module fx-inertia">
+        <span class="tag">01</span>
+        <h3>Signal</h3>
+        <p>Nav links scramble through alien glyphs before resolving, with a magnetic ring expanding outward on contact.</p>
+      </div>
+      <div class="module fx-inertia">
+        <span class="tag">02</span>
+        <h3>Drift</h3>
+        <p>Scroll and this whole section lags a beat behind your input, like it's floating in water rather than pinned to glass.</p>
+      </div>
+      <div class="module fx-inertia">
+        <span class="tag">03</span>
+        <h3>Pulse</h3>
+        <p>Click a nav link and the screen fractures into dust before reassembling on the next section.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="frames" class="fx-inertia">
+    <p class="section-label">03 &mdash; Frames</p>
+    <h2 style="font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 700; letter-spacing: -0.01em;">Images don't just appear.</h2>
+    <div class="frame-grid">
+      <div class="frame" data-reveal><span class="frame-label">FRAME_01</span></div>
+      <div class="frame" data-reveal><span class="frame-label">FRAME_02</span></div>
+      <div class="frame" data-reveal><span class="frame-label">FRAME_03</span></div>
+    </div>
+  </section>
+
+</main>
+
+<footer>LIVING LIQUID &mdash; VISUAL PROTOTYPE &mdash; NO CONTENT IS FINAL</footer>
+
+<script>
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---------- Dust particle field (ambient + burst) ---------- */
+  (function () {
+    var canvas = document.getElementById('dust-canvas');
+    var ctx = canvas.getContext('2d');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w, h;
+    function resize() {
+      w = window.innerWidth; h = window.innerHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    var mx = -9999, my = -9999;
+    window.addEventListener('mousemove', function (e) { mx = e.clientX; my = e.clientY; });
+
+    var COUNT = reduceMotion ? 0 : 70;
+    var particles = [];
+    for (var i = 0; i < COUNT; i++) {
+      particles.push({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        vx: (Math.random() - 0.5) * 0.12,
+        vy: (Math.random() - 0.5) * 0.12,
+        r: Math.random() * 1.2 + 0.3,
+        a: Math.random() * 0.4 + 0.15
+      });
+    }
+
+    function tick() {
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#ffffff';
+      for (var i = 0; i < particles.length; i++) {
+        var p = particles[i];
+        var dx = p.x - mx, dy = p.y - my;
+        var distSq = dx * dx + dy * dy;
+        if (distSq < 14400) {
+          var dist = Math.sqrt(distSq) || 1;
+          var force = (1 - dist / 120) * 0.6;
+          p.vx += (dx / dist) * force * 0.06;
+          p.vy += (dy / dist) * force * 0.06;
+        }
+        p.vx *= 0.98; p.vy *= 0.98;
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < -10) p.x = w + 10; if (p.x > w + 10) p.x = -10;
+        if (p.y < -10) p.y = h + 10; if (p.y > h + 10) p.y = -10;
+        ctx.globalAlpha = p.a;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      requestAnimationFrame(tick);
+    }
+    if (!reduceMotion) requestAnimationFrame(tick);
+  })();
+
+  /* ---------- Digital dust burst transition on nav click ---------- */
+  (function () {
+    var canvas = document.getElementById('burst-canvas');
+    var ctx = canvas.getContext('2d');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var w, h;
+    function resize() {
+      w = window.innerWidth; h = window.innerHeight;
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      canvas.style.width = w + 'px'; canvas.style.height = h + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    var burst = [];
+    function spawnBurst() {
+      var cx = w / 2, cy = h / 2;
+      for (var i = 0; i < 140; i++) {
+        var angle = Math.random() * Math.PI * 2;
+        var speed = Math.random() * 9 + 2;
+        burst.push({
+          x: cx, y: cy,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 1,
+          r: Math.random() * 2 + 0.6
+        });
+      }
+    }
+
+    var running = false;
+    function loop() {
+      ctx.clearRect(0, 0, w, h);
+      var alive = false;
+      ctx.fillStyle = '#ffffff';
+      for (var i = 0; i < burst.length; i++) {
+        var p = burst[i];
+        if (p.life <= 0) continue;
+        alive = true;
+        p.x += p.vx; p.y += p.vy;
+        p.vx *= 0.94; p.vy *= 0.94;
+        p.life -= 0.028;
+        ctx.globalAlpha = Math.max(0, p.life);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+      if (alive) {
+        requestAnimationFrame(loop);
+      } else {
+        burst = [];
+        running = false;
+      }
+    }
+
+    window.__triggerDustBurst = function () {
+      if (reduceMotion) return;
+      spawnBurst();
+      if (!running) { running = true; requestAnimationFrame(loop); }
+    };
+  })();
+
+  /* ---------- Nav scramble-text hover ---------- */
+  var SCRAMBLE_CHARS = '#$%&*+=<>/\\|~^01∆∇◆';
+  document.querySelectorAll('.scramble').forEach(function (link) {
+    var real = link.getAttribute('data-text');
+    var frame = null;
+    link.addEventListener('mouseenter', function () {
+      if (reduceMotion) return;
+      if (frame) cancelAnimationFrame(frame);
+      var start = performance.now();
+      var duration = 380;
+      var ringEl = link.querySelector('.nav-ring');
+      function step(now) {
+        var p = Math.min(1, (now - start) / duration);
+        var lockedCount = Math.floor(p * real.length);
+        var out = '';
+        for (var i = 0; i < real.length; i++) {
+          out += i < lockedCount ? real[i] : SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+        }
+        link.childNodes[0].textContent = out;
+        if (p < 1) {
+          frame = requestAnimationFrame(step);
+        } else {
+          link.childNodes[0].textContent = real;
+          frame = null;
+        }
+      }
+      frame = requestAnimationFrame(step);
+    });
+  });
+
+  /* ---------- Nav click: dust burst then smooth-scroll ---------- */
+  document.querySelectorAll('.scramble[data-target]').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      var targetEl = document.getElementById(link.getAttribute('data-target'));
+      if (!targetEl) return;
+      e.preventDefault();
+      if (window.__triggerDustBurst) window.__triggerDustBurst();
+      setTimeout(function () {
+        targetEl.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+      }, reduceMotion ? 0 : 140);
+      history.pushState(null, '', '#' + link.getAttribute('data-target'));
+    });
+  });
+
+  /* ---------- Scroll inertia: sections lag + stretch behind scroll velocity ---------- */
+  var inertiaEls = document.querySelectorAll('.fx-inertia');
+  if (inertiaEls.length && !reduceMotion) {
+    var lerped = window.scrollY;
+    var lastY = window.scrollY;
+    function inertiaTick() {
+      var target = window.scrollY;
+      var velocity = target - lastY;
+      lastY = target;
+      lerped += (target - lerped) * 0.09;
+      var lag = target - lerped;
+      var offset = Math.max(-16, Math.min(16, lag * -0.5));
+      var stretch = Math.max(-0.035, Math.min(0.035, velocity * 0.004));
+      inertiaEls.forEach(function (el) {
+        el.style.transform = 'translateY(' + offset.toFixed(1) + 'px) scaleY(' + (1 + stretch).toFixed(3) + ')';
+      });
+      requestAnimationFrame(inertiaTick);
+    }
+    requestAnimationFrame(inertiaTick);
+  }
+
+  /* ---------- Frame reveal on scroll into view ---------- */
+  var frames = document.querySelectorAll('[data-reveal]');
+  if (frames.length) {
+    if (reduceMotion) {
+      frames.forEach(function (f) { f.classList.add('revealed'); });
+    } else {
+      var frameObserver = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+            frameObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.3 });
+      frames.forEach(function (f) { frameObserver.observe(f); });
+    }
+  }
+</script>
+
 </body>
 </html>
