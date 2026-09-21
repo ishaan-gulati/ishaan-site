@@ -206,57 +206,56 @@
     padding: 6rem 1.5rem;
     overflow: hidden;
   }
-  .orb {
+  .orbit-field { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+
+  .ring {
     position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: min(58vw, 620px);
-    height: min(58vw, 620px);
-    z-index: 0;
-    pointer-events: none;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 50%;
+    will-change: transform;
   }
-  .orb-cells { position: absolute; inset: 0; filter: url(#orb-goo); }
-  .orb-cell { position: absolute; border-radius: 50%; will-change: transform; }
-  .orb-cell.c1 {
-    width: 60%; height: 58%; left: 22%; top: 23%;
-    background: radial-gradient(circle at 40% 35%, rgba(230,231,234,0.94), rgba(16,16,18,0.92) 68%, transparent 100%);
-    animation: orb-drift-1 13s ease-in-out infinite, orb-breathe 5.5s ease-in-out infinite;
+  .ring-a { width: 38vw; height: 38vw; top: -16vw; left: -16vw; animation: ring-spin 46s linear infinite; }
+  .ring-b { width: 46vw; height: 46vw; bottom: -19vw; right: -19vw; animation: ring-spin 62s linear infinite reverse; }
+  .ring-c { width: 26vw; height: 26vw; top: -9vw; right: -9vw; animation: ring-spin 34s linear infinite; }
+  @keyframes ring-spin { to { transform: rotate(360deg); } }
+
+  .sat {
+    position: absolute;
+    top: 0; left: 50%;
+    width: 5px; height: 5px;
+    margin-left: -2.5px; margin-top: -2.5px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 8px rgba(255, 255, 255, 0.85);
   }
-  .orb-cell.c2 {
-    width: 40%; height: 40%; left: 16%; top: 42%;
-    background: radial-gradient(circle at 50% 50%, rgba(160,163,167,0.85), transparent 76%);
-    animation: orb-drift-2 16s ease-in-out infinite, orb-breathe 6.5s ease-in-out infinite 0.3s;
+
+  .streak {
+    position: absolute;
+    width: 1px;
+    height: 16vw;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.08);
   }
-  .orb-cell.c3 {
-    width: 36%; height: 36%; left: 46%; top: 16%;
-    background: radial-gradient(circle at 50% 50%, rgba(185,188,191,0.8), transparent 76%);
-    animation: orb-drift-3 14.5s ease-in-out infinite, orb-breathe 6s ease-in-out infinite 0.6s;
+  .streak::after {
+    content: "";
+    position: absolute;
+    left: 0; top: -40%;
+    width: 100%; height: 40%;
+    background: linear-gradient(180deg, transparent, rgba(255,255,255,0.9), transparent);
+    animation: streak-travel 3.4s linear infinite;
   }
-  .orb-cell.c4 {
-    width: 22%; height: 14%; left: 34%; top: 24%;
-    background: radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0.96), transparent 78%);
-    mix-blend-mode: screen;
-    animation: orb-drift-4 9s ease-in-out infinite;
+  .streak-a { top: 6vh; left: 7vw; transform: rotate(18deg); animation: streak-fade 8s ease-in-out infinite; }
+  .streak-b { bottom: 8vh; right: 9vw; height: 12vw; transform: rotate(-24deg); animation: streak-fade 9.5s ease-in-out infinite 1.2s; }
+  .streak-c { top: 14vh; right: 14vw; height: 10vw; transform: rotate(30deg); animation: streak-fade 7s ease-in-out infinite 0.6s; }
+  @keyframes streak-travel { 0% { top: -40%; } 100% { top: 100%; } }
+  @keyframes streak-fade { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ring, .streak, .streak::after { animation: none; }
   }
-  .orb-cell.c5 {
-    width: 15%; height: 38%; left: 24%; top: 50%;
-    background: radial-gradient(ellipse at 50% 30%, rgba(110,113,117,0.7), transparent 82%);
-    animation: orb-drift-5 18s ease-in-out infinite;
+  @media (max-width: 720px) {
+    .ring-a, .ring-b, .ring-c { display: none; }
   }
-  .orb-cell.c6 {
-    width: 18%; height: 18%; left: 60%; top: 54%;
-    background: radial-gradient(circle at 50% 50%, rgba(200,203,206,0.75), transparent 78%);
-    animation: orb-drift-6 15s ease-in-out infinite;
-  }
-  @keyframes orb-drift-1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(2%,-3%) scale(1.06); } }
-  @keyframes orb-drift-2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-6%,5%) scale(0.9); } }
-  @keyframes orb-drift-3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(6%,4%) scale(1.12); } }
-  @keyframes orb-drift-4 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-5%,3%); } }
-  @keyframes orb-drift-5 { 0%,100% { transform: translate(0,0) scaleY(1); } 50% { transform: translate(5%,-6%) scaleY(1.2); } }
-  @keyframes orb-drift-6 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-4%,-5%) scale(1.15); } }
-  @keyframes orb-breathe { 0%,100% { opacity: 0.86; } 50% { opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { .orb-cell { animation: none; } }
 
   .stage-copy { position: relative; z-index: 1; }
   .eyebrow {
@@ -420,28 +419,16 @@
   </ul>
 </nav>
 
-<svg width="0" height="0" style="position: absolute;" aria-hidden="true">
-  <defs>
-    <filter id="orb-goo" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur" />
-      <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -11" result="goo" />
-      <feBlend in="SourceGraphic" in2="goo" />
-    </filter>
-  </defs>
-</svg>
-
 <main id="main">
 
   <section id="stage" class="stage">
-    <div class="orb" aria-hidden="true">
-      <div class="orb-cells">
-        <span class="orb-cell c1"></span>
-        <span class="orb-cell c2"></span>
-        <span class="orb-cell c3"></span>
-        <span class="orb-cell c4"></span>
-        <span class="orb-cell c5"></span>
-        <span class="orb-cell c6"></span>
-      </div>
+    <div class="orbit-field" aria-hidden="true">
+      <div class="ring ring-a"><span class="sat"></span></div>
+      <div class="ring ring-b"><span class="sat"></span></div>
+      <div class="ring ring-c"><span class="sat"></span></div>
+      <span class="streak streak-a"></span>
+      <span class="streak streak-b"></span>
+      <span class="streak streak-c"></span>
     </div>
     <div class="stage-copy">
       <p class="eyebrow">Fintech &amp; AI Builder</p>
