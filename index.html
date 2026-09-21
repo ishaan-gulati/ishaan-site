@@ -320,18 +320,15 @@
     overflow: hidden;
   }
   .hero-orb {
-    position: absolute;
-    left: 50%;
-    bottom: 4vw;
-    transform: translateX(-50%);
-    width: min(44vw, 420px);
-    height: min(44vw, 420px);
-    z-index: 0;
+    margin: 1.5rem auto 0;
+    width: min(30vw, 280px);
+    height: min(30vw, 280px);
     pointer-events: none;
   }
   .hero-orb-cells {
-    position: absolute;
-    inset: 0;
+    position: relative;
+    width: 100%;
+    height: 100%;
     filter: url(#orb-goo);
   }
   .orb-cell {
@@ -340,33 +337,33 @@
     will-change: transform;
   }
   .orb-cell.c1 {
-    width: 60%; height: 56%;
-    left: 20%; top: 24%;
+    width: 62%; height: 60%;
+    left: 22%; top: 22%;
     background: radial-gradient(circle at 40% 35%, rgba(168, 130, 68, 0.92), rgba(42, 32, 17, 0.88) 68%, transparent 100%);
     animation: orb-drift-1 19s ease-in-out infinite;
   }
   .orb-cell.c2 {
-    width: 38%; height: 38%;
-    left: 8%; top: 46%;
+    width: 42%; height: 42%;
+    left: 18%; top: 40%;
     background: radial-gradient(circle at 50% 50%, rgba(146, 108, 54, 0.85), transparent 76%);
     animation: orb-drift-2 23s ease-in-out infinite;
   }
   .orb-cell.c3 {
-    width: 34%; height: 34%;
-    left: 54%; top: 12%;
+    width: 38%; height: 38%;
+    left: 44%; top: 18%;
     background: radial-gradient(circle at 50% 50%, rgba(156, 116, 60, 0.8), transparent 76%);
     animation: orb-drift-3 21s ease-in-out infinite;
   }
   .orb-cell.c4 {
-    width: 26%; height: 16%;
-    left: 32%; top: 16%;
+    width: 24%; height: 15%;
+    left: 34%; top: 24%;
     background: radial-gradient(ellipse at 50% 50%, rgba(255, 240, 205, 0.85), transparent 78%);
     mix-blend-mode: screen;
     animation: orb-drift-4 14s ease-in-out infinite;
   }
   .orb-cell.c5 {
-    width: 15%; height: 42%;
-    left: 12%; top: 56%;
+    width: 16%; height: 36%;
+    left: 24%; top: 46%;
     background: radial-gradient(ellipse at 50% 30%, rgba(124, 94, 47, 0.7), transparent 82%);
     animation: orb-drift-5 27s ease-in-out infinite;
   }
@@ -404,6 +401,7 @@
   .hero-tagline { animation-delay: 0.22s; }
   .hero-cta { animation-delay: 0.34s; }
   .scroll-cue { animation-delay: 0.48s; }
+  .hero-orb { animation-delay: 0.6s; }
   @keyframes hero-in { to { opacity: 1; transform: translateY(0); } }
   @media (prefers-reduced-motion: reduce) {
     .hero-content > * { animation: none; opacity: 1; transform: none; }
@@ -735,21 +733,12 @@
   <svg width="0" height="0" style="position: absolute;" aria-hidden="true">
     <defs>
       <filter id="orb-goo" x="-40%" y="-40%" width="180%" height="180%">
-        <feGaussianBlur in="SourceGraphic" stdDeviation="16" result="blur" />
-        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 20 -8" result="goo" />
+        <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="blur" />
+        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 26 -11" result="goo" />
         <feBlend in="SourceGraphic" in2="goo" />
       </filter>
     </defs>
   </svg>
-  <div class="hero-orb" aria-hidden="true">
-    <div class="hero-orb-cells">
-      <span class="orb-cell c1"></span>
-      <span class="orb-cell c2"></span>
-      <span class="orb-cell c3"></span>
-      <span class="orb-cell c4"></span>
-      <span class="orb-cell c5"></span>
-    </div>
-  </div>
   <div class="hero-content">
     <h1 class="hero-name">Hi, I'm Ishaan</h1>
     <p class="hero-tagline">Visionary &middot; Builder &middot; Future-focused</p>
@@ -760,6 +749,15 @@
     <div class="scroll-cue" aria-hidden="true">
       <span class="rail"></span>
       Scroll
+    </div>
+    <div class="hero-orb" aria-hidden="true">
+      <div class="hero-orb-cells">
+        <span class="orb-cell c1"></span>
+        <span class="orb-cell c2"></span>
+        <span class="orb-cell c3"></span>
+        <span class="orb-cell c4"></span>
+        <span class="orb-cell c5"></span>
+      </div>
     </div>
   </div>
 </section>
