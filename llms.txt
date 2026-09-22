@@ -18,7 +18,17 @@ Ishaan Gulati is a high school student (Class of 2029) at Skyview High School in
 
 ## Pages
 
-- Homepage: https://www.ishaangulati.com/ - hero, about, projects, experience, and contact information, all on one page.
+- [Homepage](https://www.ishaangulati.com/): hero, about, projects, experience, FAQ, and contact information, all on one page.
+- [Pulse on the App Store](https://apps.apple.com/us/app/pulse-social-paper-trading/id6760734269): social paper trading app for teens, 250+ users.
+- [Fern.ai](https://github.com/AnayShekhar/hacktjwinner): AI medical bill auditor, Best Mobile App at HackTJ 13.0.
+- [Felix](https://devpost.com/software/felix-tebdov): multi-agent AI assistant, Best Use of GCP at TillyHacks 2026.
+
+## Profiles
+
+- [LinkedIn](https://www.linkedin.com/in/ishaan-gulati-834a25286/)
+- [GitHub](https://github.com/ishaan-gulati)
+- [Devpost](https://devpost.com/ishaan1gulati)
+- [Instagram](https://www.instagram.com/investingwithishaan/)
 
 ## Contact
 
